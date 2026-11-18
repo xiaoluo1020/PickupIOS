@@ -1,0 +1,52 @@
+name: Build IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: ios/PickupHelper
+        run: xcodegen generate
+
+      - name: Build (unsigned)
+        working-directory: ios/PickupHelper
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project PickupHelper.xcodeproj \
+            -scheme PickupHelper \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            build
+
+      - name: Package IPA
+        working-directory: ios/PickupHelper
+        run: |
+          rm -rf Payload PickupHelper.ipa
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/PickupHelper.app Payload/
+          zip -r PickupHelper.ipa Payload
+          ls -lh PickupHelper.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: PickupHelper-ipa
+          path: ios/PickupHelper/PickupHelper.ipa

@@ -1,0 +1,66 @@
+name: PickupHelper
+
+options:
+  bundleIdPrefix: com.pickuphelper
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ""
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+targets:
+  PickupHelper:
+    type: application
+    platform: iOS
+    sources:
+      - path: PickupApp
+        excludes:
+          - "Info.plist"
+          - "*.entitlements"
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.pickuphelper.app
+        PRODUCT_NAME: PickupHelper
+        INFOPLIST_FILE: PickupApp/Info.plist
+        CODE_SIGN_ENTITLEMENTS: PickupApp/PickupApp.entitlements
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    dependencies:
+      - target: PickupWidgetExtension
+        embed: true
+
+  PickupWidgetExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: PickupWidget
+        excludes:
+          - "Info.plist"
+          - "*.entitlements"
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.pickuphelper.app.widget
+        PRODUCT_NAME: PickupWidgetExtension
+        INFOPLIST_FILE: PickupWidget/Info.plist
+        CODE_SIGN_ENTITLEMENTS: PickupWidget/PickupWidget.entitlements
+        SKIP_INSTALL: YES
+        TARGETED_DEVICE_FAMILY: "1"
+
+schemes:
+  PickupHelper:
+    build:
+      targets:
+        PickupHelper: all
+    run:
+      config: Debug
+    archive:
+      config: Release
